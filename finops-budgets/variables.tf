@@ -1,0 +1,69 @@
+variable "billing_account" {
+  description = "GCP billing account ID"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[A-F0-9]{6}-[A-F0-9]{6}-[A-F0-9]{6}$", var.billing_account))
+    error_message = "billing_account must match pattern XXXXXX-XXXXXX-XXXXXX."
+  }
+}
+
+variable "pubsub_topic_id" {
+  description = "Full Pub/Sub topic ID to publish budget threshold events to, e.g. module.finops_alerts.pubsub_topic_id."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.pubsub_topic_id == "" || can(regex("^projects/[a-z][a-z0-9-]+/topics/.+$", var.pubsub_topic_id))
+    error_message = "pubsub_topic_id must be a full Pub/Sub topic ID (projects/PROJECT/topics/NAME) when non-empty."
+  }
+}
+
+variable "notification_channel_ids" {
+  description = "Map of email to notification channel ID, e.g. module.finops_alerts.notification_channel_ids."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for email, _ in var.notification_channel_ids : can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", email))])
+    error_message = "Each key in notification_channel_ids must be a valid email address."
+  }
+}
+
+variable "budgets" {
+  description = "Map of budget definitions, including scoping fields for per-project/folder budgets and budget-target metadata usable for downstream reporting."
+  type = map(object({
+    display_name  = string
+    currency_code = optional(string, "USD")
+    units         = string
+    threshold_rules = list(object({
+      threshold_percent = number
+      spend_basis       = optional(string, "CURRENT_SPEND")
+    }))
+    budget_filter = optional(object({
+      projects           = optional(list(string))
+      resource_ancestors = optional(list(string))
+      labels             = optional(map(string))
+      services           = optional(list(string))
+    }))
+    monitoring_notification_channels = optional(list(string), [])
+    disable_default_iam_recipients   = optional(bool, false)
+    enable_project_level_recipients  = optional(bool, true)
+    credit_types_treatment           = optional(string, "INCLUDE_ALL_CREDITS")
+    calendar_period                  = optional(string, "MONTH")
+    budget_month                     = optional(string)
+    budget_project                   = optional(string)
+  }))
+  default = {}
+}
+
+variable "iam_viewers" {
+  description = "List of members to grant billing viewer (can see budgets)"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for m in var.iam_viewers : can(regex("^(user|group|serviceAccount|domain):.+", m))])
+    error_message = "Each iam_viewers member must be prefixed with user:, group:, serviceAccount:, or domain:."
+  }
+}
