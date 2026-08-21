@@ -20,11 +20,6 @@ module "org_policies" {
     "compute.skipDefaultNetworkCreation" = {
       enforce = "TRUE"
     }
-    "compute.vmExternalIpAccess" = {
-      list_constraints = [{
-        denied_values = ["*"]
-      }]
-    }
     "compute.trustedImageProjects" = {
       list_constraints = [{
         allowed_values = [

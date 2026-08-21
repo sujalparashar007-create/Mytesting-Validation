@@ -44,3 +44,21 @@ variable "custom_constraint_policies" {
   }))
   default = {}
 }
+
+variable "folder_target_ids" {
+  description = "Folder IDs where org_constraints should also be applied directly (numeric IDs, no \"folders/\" prefix)."
+  type        = list(string)
+  default     = []
+}
+
+variable "project_target_ids" {
+  description = "Project IDs where org_constraints should also be applied directly."
+  type        = list(string)
+  default     = []
+}
+
+variable "create_org_policies" {
+  description = "Whether to create org-level policies from org_constraints."
+  type        = bool
+  default     = true
+}

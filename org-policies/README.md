@@ -30,6 +30,8 @@ module "org_policies" {
   source = "../org-policies"
 
   org_id = "123456789012"
+  folder_target_ids  = ["1234567890"]
+  project_target_ids = ["my-project-id"]
 
   org_constraints = {
     "compute.disableSerialPortAccess" = {
@@ -76,6 +78,8 @@ org-wide setting for that resource only.
 | org_id | The numeric ID of the GCP organization. | `string` | n/a | yes |
 | org_constraints | Map of built-in constraints to enforce, keyed by constraint name. | `map(object)` | `{}` | no |
 | custom_constraint_policies | Map of custom constraints to create and enforce, keyed by a descriptive name. | `map(object)` | `{}` | no |
+| folder_target_ids | Folder IDs where org_constraints should also be applied directly. | `list(string)` | `[]` | no |
+| project_target_ids | Project IDs where org_constraints should also be applied directly. | `list(string)` | `[]` | no |
 
 ## Outputs
 

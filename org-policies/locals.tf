@@ -20,4 +20,30 @@ locals {
       }
     ]
   ])
+
+  # Optional direct policy application targets. These use the same rule
+  # definitions as org_constraints, but are applied at folder/project scope.
+  folder_policy_targets = flatten([
+    for constraint, cfg in var.org_constraints : [
+      for fid in var.folder_target_ids : {
+        constraint       = constraint
+        id               = fid
+        enforce          = try(cfg.enforce, null)
+        conditions       = try(cfg.conditions, [])
+        list_constraints = try(cfg.list_constraints, [])
+      }
+    ]
+  ])
+
+  project_policy_targets = flatten([
+    for constraint, cfg in var.org_constraints : [
+      for pid in var.project_target_ids : {
+        constraint       = constraint
+        id               = pid
+        enforce          = try(cfg.enforce, null)
+        conditions       = try(cfg.conditions, [])
+        list_constraints = try(cfg.list_constraints, [])
+      }
+    ]
+  ])
 }
