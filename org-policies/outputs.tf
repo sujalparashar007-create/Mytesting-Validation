@@ -13,3 +13,12 @@ output "custom_constraint_names" {
     name => constraint.name
   }
 }
+
+output "folder_custom_constraint_policy_ids" {
+  description = "Map of \"<constraint-key>::folder::<folder-id>\" to the folder-level custom constraint policy resource ID."
+  value = {
+    for key, policy in google_org_policy_policy.folder_custom_constraint_policies :
+    key => policy.id
+  }
+}
+

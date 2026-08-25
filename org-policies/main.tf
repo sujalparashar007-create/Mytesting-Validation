@@ -166,7 +166,7 @@ resource "google_org_policy_custom_constraint" "custom_constraints" {
 }
 
 resource "google_org_policy_policy" "org_custom_constraints_policies" {
-  for_each = var.custom_constraint_policies
+  for_each = var.create_org_policies ? var.custom_constraint_policies : {}
 
   name   = "organizations/${var.org_id}/policies/${google_org_policy_custom_constraint.custom_constraints[each.key].name}"
   parent = "organizations/${var.org_id}"
@@ -189,3 +189,35 @@ resource "google_org_policy_policy" "org_custom_constraints_policies" {
     }
   }
 }
+
+# Folder-level enforcement policies for custom constraints. GCP requires the
+# custom constraint DEFINITION to live at organization scope (see
+# custom_constraints above), but the ENFORCEMENT policy can target folders,
+# so these resources org-policy the same constraints to var.folder_target_ids.
+resource "google_org_policy_policy" "folder_custom_constraint_policies" {
+  for_each = {
+    for t in local.folder_custom_policy_targets : "${t.name}::folder::${t.id}" => t
+  }
+
+  name   = "folders/${each.value.id}/policies/${google_org_policy_custom_constraint.custom_constraints[each.value.name].name}"
+  parent = "folders/${each.value.id}"
+
+  spec {
+    dynamic "rules" {
+      for_each = each.value.conditions
+      content {
+        enforce = rules.value.enforce
+        condition {
+          expression  = try(rules.value.expression, null)
+          title       = try(rules.value.title, null)
+          description = try(rules.value.description, null)
+        }
+      }
+    }
+
+    rules {
+      enforce = each.value.enforce
+    }
+  }
+}
+

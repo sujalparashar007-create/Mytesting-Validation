@@ -87,3 +87,4 @@ org-wide setting for that resource only.
 |---|---|
 | org_policy_ids | Map of constraint name to the applied org-level policy resource ID. |
 | custom_constraint_names | Map of custom constraint key to its full constraint name. |
+| folder_custom_constraint_policy_ids | Map of "<key>::folder::<folder-id>" to the folder-level custom policy resource ID. |

@@ -46,4 +46,19 @@ locals {
       }
     ]
   ])
+
+  # Folder targets for custom constraints. GCP requires custom constraint
+  # DEFINITIONS to be org-scoped, but their ENFORCEMENT policies can target
+  # folders; fan each custom constraint out to the folder target IDs.
+  folder_custom_policy_targets = flatten([
+    for name, cfg in var.custom_constraint_policies : [
+      for fid in var.folder_target_ids : {
+        name       = name
+        id         = fid
+        enforce    = cfg.enforce
+        conditions = try(cfg.conditions, [])
+      }
+    ]
+  ])
+
 }
