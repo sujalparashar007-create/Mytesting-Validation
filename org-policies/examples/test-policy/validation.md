@@ -2,7 +2,19 @@
 
 ## Scope: Folder Level (278994416390)
 
-All 10 policies are applied at folder level and validated on GCP Console.
+All **9** policies/constraints are applied at folder level and validated on GCP Console.
+
+Deployed policies:
+
+1. `iam.disableServiceAccountKeyCreation`
+2. `compute.skipDefaultNetworkCreation`
+3. `compute.vmExternalIpAccess`
+4. `gcp.restrictServiceUsage`
+5. `storage.uniformBucketLevelAccess`
+6. `gcp.restrictNonCmekServices`
+7. `cloudfunctions.allowedVpcConnectorEgressSettings`
+8. `custom.restrictVmMachineType` (custom constraint)
+9. `custom.restrictDiskTypes` (custom constraint)
 
 ---
 
@@ -35,7 +47,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 **Step 2: Try to create a key**
 1. Click on the service account
-2. Go to **"Keys"** tab
+2. Go to the **"Keys"** tab
 3. Click **"Add Key"** → **"Create new key"**
 4. Select **"JSON"** format
 5. Click **"Create"**
@@ -44,45 +56,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 ---
 
-## Policy 2: `iam.restrictCrossProjectServiceAccountLienRemoval`
-
-### Part 1: Validate Existing Resource (Confirm Policy Applied)
-
-**Step 1: Go to GCP Console**
-1. Open: https://console.cloud.google.com
-2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** → **Organization Policies**
-4. In the filter box, select **"Folder"** and enter: `278994416390`
-
-**Step 2: Find the policy**
-1. In the search box, type: `iam.restrictCrossProjectServiceAccountLienRemoval`
-2. Click on the policy name
-3. Verify:
-   - **Status:** Enforced
-   - **Value:** TRUE
-   - **Scope:** folders/278994416390
-
----
-
-### Part 2: Test the Policy (Verify Enforcement)
-
-**Step 1: Go to Liens page**
-1. Navigate to: **IAM & Admin** → **Liens**
-2. Select project: `test-project-506110`
-
-**Step 2: Try to create a lien**
-1. Click **"Create Lien"**
-2. Select restriction type: `resourcemanager.projects.delete`
-3. Add a reason (e.g., "Test lien")
-4. Click **"Create"**
-
-**Expected Result:** The lien creation should be restricted or the option to remove liens created by cross-project service accounts should be blocked.
-
-**Note:** This policy prevents service accounts from other projects from removing resource liens. It's a protective measure to ensure that critical resources cannot be deleted by unauthorized cross-project service accounts.
-
----
-
-## Policy 3: `compute.skipDefaultNetworkCreation`
+## Policy 2: `compute.skipDefaultNetworkCreation`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -122,7 +96,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 ---
 
-## Policy 4: `compute.managed.vmExternalIpAccess`
+## Policy 3: `compute.vmExternalIpAccess`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -137,7 +111,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 2. Click on the policy name
 3. Verify:
    - **Status:** Enforced
-   - **Value:** All VMs denied external IP access
+   - **Value:** All VMs denied external IP access (`deny_all`)
    - **Scope:** folders/278994416390
 
 ---
@@ -154,16 +128,16 @@ All 10 policies are applied at folder level and validated on GCP Console.
    - **Name:** `test-external-ip-vm`
    - **Region:** `us-central1`
    - **Zone:** `us-central1-a`
-   - **Machine type:** `e2-micro`
-3. Go to **"Networking"** section
-4. Under **"Network interface"**, try to set **"External IP"** to **"Ephemeral"**
+   - **Machine type:** `n1-standard-1`
+3. Go to the **"Networking"** section
+4. Under **"Network interface"**, set **"External IP"** to **"Ephemeral"**
 5. Click **"Create"**
 
 **Expected Result:** Error message: "Policy constraints/compute.vmExternalIpAccess violated" or similar policy violation error.
 
 ---
 
-## Policy 5: `gcp.restrictServiceUsage`
+## Policy 4: `gcp.restrictServiceUsage`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -197,7 +171,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 > Important: this policy is a **deny list**, NOT an allow list. Only the 3 services above are blocked. Enabling any OTHER API (Cloud Functions, BigQuery, Pub/Sub, etc.) will SUCCEED and does NOT prove the policy works. Use one of the denied APIs:
 
-1. Search for **`Cloud Translation API`** (`translate.googleapis.com`) - or use **`Cloud Vision API`** (`vision.googleapis.com`) / **`Genomics API`** (`genomics.googleapis.com`)
+1. Search for **Cloud Translation API** (`translate.googleapis.com`) - or use **Cloud Vision API** (`vision.googleapis.com`) / **Genomics API** (`genomics.googleapis.com`)
 2. Click on the API
 
 **Case A - API shows an "Enable" button (currently disabled):**
@@ -228,7 +202,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 
 ---
 
-## Policy 6: `storage.uniformBucketLevelAccess`
+## Policy 5: `storage.uniformBucketLevelAccess`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -259,7 +233,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 2. Fill in:
    - **Name:** `test-uniform-access-bucket`
    - **Region:** `us-central1`
-3. Go to **"Permissions"** section
+3. Go to the **"Permissions"** section
 4. Try to disable **"Uniform bucket-level access"**
 5. Click **"Create"**
 
@@ -272,7 +246,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 
 ---
 
-## Policy 7: `gcp.restrictNonCmekServices`
+## Policy 6: `gcp.restrictNonCmekServices`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -287,7 +261,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 2. Click on the policy name
 3. Verify:
    - **Status:** Enforced
-   - **Value:** Allowed services list (compute.googleapis.com, storage.googleapis.com)
+   - **Value:** Denied services list (`compute.googleapis.com`, `storage.googleapis.com`)
    - **Scope:** folders/278994416390
 
 ---
@@ -318,103 +292,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 
 ---
 
-## Policy 8: `compute.disableNonFIPSMachineTypes`
-
-### Part 1: Validate Existing Resource (Confirm Policy Applied)
-
-**Step 1: Go to GCP Console**
-1. Open: https://console.cloud.google.com
-2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** → **Organization Policies**
-4. In the filter box, select **"Folder"** and enter: `278994416390`
-
-**Step 2: Find the policy**
-1. In the search box, type: `compute.disableNonFIPSMachineTypes`
-2. Click on the policy name
-3. Verify:
-   - **Status:** Enforced
-   - **Value:** TRUE
-   - **Scope:** folders/278994416390
-
----
-
-### Part 2: Test the Policy (Verify Enforcement)
-
-**Step 1: Go to VM Instances**
-1. Navigate to: **Compute Engine** → **VM instances**
-2. Select project: `test-project-506110`
-
-**Step 2: Try to create a VM with non-FIPS machine type**
-1. Click **"Create Instance"**
-2. Fill in:
-   - **Name:** `test-non-fips-vm`
-   - **Region:** `us-central1`
-   - **Zone:** `us-central1-a`
-3. Under **"Machine type"**, select a non-FIPS machine type (e.g., `e2-micro`, `e2-small`, `n1-standard-1`)
-4. Click **"Create"**
-
-**Expected Result:** Error message: "Policy constraints/compute.disableNonFIPSMachineTypes violated" or similar policy violation error.
-
-**Step 3: Verify FIPS machine types work**
-1. Try to create a VM with a FIPS-compliant machine type (e.g., `n2-standard-2`, `c2-standard-4`)
-2. Verify: VM creation should succeed without error.
-
----
-
-## Policy 9: `custom.restrictDiskTypes` (Custom Constraint)
-
-### Part 1: Validate Existing Resource (Confirm Policy Applied)
-
-**Step 1: Go to GCP Console**
-1. Open: https://console.cloud.google.com
-2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** → **Organization Policies**
-4. In the filter box, select **"Folder"** and enter: `278994416390`
-
-**Step 2: Find the custom constraint**
-1. In the search box, type: `custom.restrictDiskTypes`
-2. Click on the constraint name
-3. Verify:
-   - **Status:** Enforced
-   - **Value:** TRUE
-   - **Scope:** folders/278994416390
-
-**Step 3: Check custom constraint definition**
-1. Navigate to: **IAM & Admin** → **Organization Policies** → **Custom Constraints**
-2. Search for: `custom.restrictDiskTypes`
-3. Verify:
-   - **Resource type:** `compute.googleapis.com/Disk`
-   - **Method types:** CREATE
-   - **Condition:** `resource.type != 'pd-standard' && resource.type != 'pd-balanced'`
-   - **Action:** DENY
-
----
-
-### Part 2: Test the Policy (Verify Enforcement)
-
-**Step 1: Go to Compute Engine**
-1. Navigate to: **Compute Engine** → **Disks**
-2. Select project: `test-project-506110`
-
-**Step 2: Try to create a disk with restricted type**
-1. Click **"Create Disk"**
-2. Fill in:
-   - **Name:** `test-restricted-disk`
-   - **Region:** `us-central1`
-   - **Zone:** `us-central1-a`
-   - **Encryption:** Customer-managed key (CMEK)
-3. Under **"Disk type"**, select a restricted type (e.g., `pd-ssd`, `pd-extreme`)
-4. Click **"Create"**
-
-**Expected Result:** Error message: "Policy constraints/custom.restrictDiskTypes violated" or similar policy violation error.
-
-**Step 3: Verify allowed disk types work**
-1. Try to create a disk with an allowed type (`pd-standard` or `pd-balanced`)
-2. Verify: Disk creation should succeed without error.
-
----
-
-## Policy 10: `cloudfunctions.allowedVpcConnectorEgressSettings`
+## Policy 7: `cloudfunctions.allowedVpcConnectorEgressSettings`
 
 ### Part 1: Validate Existing Resource (Confirm Policy Applied)
 
@@ -429,7 +307,7 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 2. Click on the policy name
 3. Verify:
    - **Status:** Enforced
-   - **Value:** Allowed values list (PRIVATE_RANGES_ONLY)
+   - **Value:** Allowed values list (`PRIVATE_RANGES_ONLY`)
    - **Scope:** folders/278994416390
 
 ---
@@ -457,19 +335,124 @@ gcloud services enable translate.googleapis.com --project=test-project-506110
 
 ---
 
+## Policy 8: `custom.restrictVmMachineType` (Custom Constraint)
+
+### Part 1: Validate Existing Resource (Confirm Policy Applied)
+
+**Step 1: Go to GCP Console**
+1. Open: https://console.cloud.google.com
+2. Select your organization: `563019909339`
+3. Navigate to: **IAM & Admin** → **Organization Policies**
+4. In the filter box, select **"Folder"** and enter: `278994416390`
+
+**Step 2: Find the custom constraint policy**
+1. In the search box, type: `custom.restrictVmMachineType`
+2. Click on the constraint name
+3. Verify:
+   - **Status:** Enforced
+   - **Value:** TRUE
+   - **Scope:** folders/278994416390
+
+**Step 3: Check custom constraint definition**
+1. Navigate to: **IAM & Admin** → **Organization Policies** → **Custom Constraints**
+2. Search for: `custom.restrictVmMachineType`
+3. Verify:
+   - **Resource type:** `compute.googleapis.com/Instance`
+   - **Method types:** CREATE
+   - **Condition:** `["n1-standard-1"].exists(type, resource.machineType.contains(type)) == false`
+   - **Action:** DENY
+
+---
+
+### Part 2: Test the Policy (Verify Enforcement)
+
+**Step 1: Go to VM Instances**
+1. Navigate to: **Compute Engine** → **VM instances**
+2. Select project: `test-project-506110`
+
+**Step 2: Try to create a VM with a non-approved machine type**
+1. Click **"Create Instance"**
+2. Fill in:
+   - **Name:** `test-non-approved-machine-type-vm`
+   - **Region:** `us-central1`
+   - **Zone:** `us-central1-a`
+3. Under **"Machine type"**, select a non-approved type (e.g., `e2-micro`, `e2-medium`, `n2d-standard-2`)
+4. Click **"Create"**
+
+**Expected Result:** Error message: "Policy constraints/custom.restrictVmMachineType violated" or similar policy violation error.
+
+**Step 3: Verify approved machine types work**
+1. Try to create a VM with the approved machine type (`n1-standard-1`)
+2. Verify: VM creation should succeed without error.
+
+---
+
+## Policy 9: `custom.restrictDiskTypes` (Custom Constraint)
+
+### Part 1: Validate Existing Resource (Confirm Policy Applied)
+
+**Step 1: Go to GCP Console**
+1. Open: https://console.cloud.google.com
+2. Select your organization: `563019909339`
+3. Navigate to: **IAM & Admin** → **Organization Policies**
+4. In the filter box, select **"Folder"** and enter: `278994416390`
+
+**Step 2: Find the custom constraint policy**
+1. In the search box, type: `custom.restrictDiskTypes`
+2. Click on the constraint name
+3. Verify:
+   - **Status:** Enforced
+   - **Value:** TRUE
+   - **Scope:** folders/278994416390
+
+**Step 3: Check custom constraint definition**
+1. Navigate to: **IAM & Admin** → **Organization Policies** → **Custom Constraints**
+2. Search for: `custom.restrictDiskTypes`
+3. Verify:
+   - **Resource type:** `compute.googleapis.com/Disk`
+   - **Method types:** CREATE
+   - **Condition:** `["pd-balanced"].exists(disktype, resource.type.contains(disktype)) == false`
+   - **Action:** DENY
+
+---
+
+### Part 2: Test the Policy (Verify Enforcement)
+
+**Step 1: Go to Compute Engine**
+1. Navigate to: **Compute Engine** → **Disks**
+2. Select project: `test-project-506110`
+
+**Step 2: Try to create a disk with restricted type**
+1. Click **"Create Disk"**
+2. Fill in:
+   - **Name:** `test-restricted-disk`
+   - **Region:** `us-central1`
+   - **Zone:** `us-central1-a`
+   - **Encryption:** Customer-managed key (CMEK)
+3. Under **"Disk type"**, select a restricted type (e.g., `pd-ssd`, `pd-extreme`, `pd-standard`)
+4. Click **"Create"**
+
+**Expected Result:** Error message: "Policy constraints/custom.restrictDiskTypes violated" or similar policy violation error.
+
+**Step 3: Verify allowed disk types work**
+1. Try to create a disk with the allowed type (`pd-balanced`)
+2. Verify: Disk creation should succeed without error.
+
+---
+
 ## Validation Summary
 
-| Policy | Constraint | Status | Scope |
-|--------|------------|--------|-------|
+| # | Policy / Constraint | Status | Scope |
+|---|---------------------|--------|-------|
 | 1 | `iam.disableServiceAccountKeyCreation` | ✅ Validated | Folder |
-| 2 | `iam.restrictCrossProjectServiceAccountLienRemoval` | ✅ Validated | Folder |
-| 3 | `compute.skipDefaultNetworkCreation` | ✅ Validated | Folder |
-| 4 | `compute.managed.vmExternalIpAccess` | ✅ Validated | Folder |
-| 5 | `gcp.restrictServiceUsage` | ✅ Validated | Folder |
-| 6 | `storage.uniformBucketLevelAccess` | ✅ Validated | Folder |
-| 7 | `gcp.restrictNonCmekServices` | ✅ Validated | Folder |
-| 8 | `compute.disableNonFIPSMachineTypes` | ✅ Validated | Folder |
+| 2 | `compute.skipDefaultNetworkCreation` | ✅ Validated | Folder |
+| 3 | `compute.vmExternalIpAccess` | ✅ Validated | Folder |
+| 4 | `gcp.restrictServiceUsage` | ✅ Validated | Folder |
+| 5 | `storage.uniformBucketLevelAccess` | ✅ Validated | Folder |
+| 6 | `gcp.restrictNonCmekServices` | ✅ Validated | Folder |
+| 7 | `cloudfunctions.allowedVpcConnectorEgressSettings` | ✅ Validated | Folder |
+| 8 | `custom.restrictVmMachineType` | ✅ Validated | Folder |
 | 9 | `custom.restrictDiskTypes` | ✅ Validated | Folder |
-| 10 | `cloudfunctions.allowedVpcConnectorEgressSettings` | ✅ Validated | Folder |
 
-**All 10 policies validated at folder level (278994416390)!** ✅
+**All 9 policies/constraints validated at folder level (278994416390)!** ✅
+

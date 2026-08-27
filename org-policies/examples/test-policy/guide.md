@@ -27,14 +27,14 @@ Folder-level apply is successful for folder `278994416390` using `org-policies\e
 ## Applied Policy Set
 
 - `iam.disableServiceAccountKeyCreation`
-- `iam.restrictCrossProjectServiceAccountLienRemoval`
 - `compute.skipDefaultNetworkCreation`
-- `compute.managed.vmExternalIpAccess`
+- `compute.vmExternalIpAccess`
 - `gcp.restrictServiceUsage`
 - `storage.uniformBucketLevelAccess`
 - `gcp.restrictNonCmekServices`
-- `compute.disableNonFIPSMachineTypes`
 - `cloudfunctions.allowedVpcConnectorEgressSettings`
+- `custom.restrictVmMachineType` (custom constraint)
+- `custom.restrictDiskTypes` (custom constraint)
 
 ## Manual Validation in GCP Console
 

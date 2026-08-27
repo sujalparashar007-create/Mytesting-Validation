@@ -4,7 +4,7 @@
 
 | File | Status | Resources/Variables |
 |------|--------|---------------------|
-| `main.tf` | ✅ | 10 org policies, CMEK resources, cross-project SA resources, CMEK-encrypted VM |
+| `main.tf` | ✅ | 9 org policies/constraints, CMEK resources, cross-project SA resources, CMEK-encrypted VM |
 | `variables.tf` | ✅ | 16 variables with types, descriptions, defaults |
 | `outputs.tf` | ✅ | 8 outputs for all resources |
 | `provider.tf` | ✅ | Google provider with billing_project, KMS API enablement |
@@ -30,17 +30,17 @@
 
 ## ✅ Resources Created in Single `terraform apply`:
 
-### Org Policies (10 policies):
+### Org Policies / Constraints (9 total):
+
 1. `iam.disableServiceAccountKeyCreation`
-2. `iam.restrictCrossProjectServiceAccountLienRemoval`
-3. `compute.skipDefaultNetworkCreation`
-4. `compute.managed.vmExternalIpAccess`
-5. `gcp.restrictServiceUsage`
-6. `storage.uniformBucketLevelAccess`
-7. `gcp.restrictNonCmekServices`
-8. `compute.disableNonFIPSMachineTypes`
+2. `compute.skipDefaultNetworkCreation`
+3. `compute.vmExternalIpAccess`
+4. `gcp.restrictServiceUsage`
+5. `storage.uniformBucketLevelAccess`
+6. `gcp.restrictNonCmekServices`
+7. `cloudfunctions.allowedVpcConnectorEgressSettings`
+8. `custom.restrictVmMachineType` (custom constraint)
 9. `custom.restrictDiskTypes` (custom constraint)
-10. `cloudfunctions.allowedVpcConnectorEgressSettings`
 
 ### CMEK Resources:
 - `google_project_service.kms_api`
