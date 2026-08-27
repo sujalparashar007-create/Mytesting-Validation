@@ -104,3 +104,61 @@ variable "enable_service_project_resources" {
   type        = bool
   default     = false
 }
+
+# -----------------------------------------------------------------------------
+# VM / Network Variables
+# -----------------------------------------------------------------------------
+
+variable "vm_name" {
+  description = "Name of the compliant positive-test VM."
+  type        = string
+  default     = "test-cmek-vm"
+}
+
+variable "vm_machine_type" {
+  description = "Machine type for the compliant positive-test VM. Must be in allowed_vm_machine_types."
+  type        = string
+  default     = "n1-standard-1"
+}
+
+variable "vm_image" {
+  description = "Boot disk image for the positive-test VM."
+  type        = string
+  default     = "debian-cloud/debian-11"
+}
+
+variable "allowed_vm_machine_types" {
+  description = "List of approved VM machine types enforced by the custom.restrictVmMachineType constraint."
+  type        = list(string)
+  default     = ["n1-standard-1"]
+}
+
+variable "network_name" {
+  description = "Name of the custom VPC created for the positive-test VM."
+  type        = string
+  default     = "test-policy-vpc"
+}
+
+variable "subnetwork_name" {
+  description = "Name of the custom subnet created for the positive-test VM."
+  type        = string
+  default     = "test-policy-subnet"
+}
+
+variable "subnetwork_cidr" {
+  description = "CIDR range for the custom subnet."
+  type        = string
+  default     = "10.0.0.0/24"
+}
+
+variable "subnetwork_region" {
+  description = "Region for the custom subnet. Must match the region of disk_zone."
+  type        = string
+  default     = "us-central1"
+}
+
+variable "sa_account_id" {
+  description = "Account ID for the cross-project test service account."
+  type        = string
+  default     = "test-cross-project-sa"
+}

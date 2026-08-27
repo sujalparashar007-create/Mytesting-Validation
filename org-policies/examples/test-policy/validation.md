@@ -13,7 +13,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -29,18 +29,18 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to Service Accounts**
-1. Navigate to: **IAM & Admin** ? **Service Accounts**
+1. Navigate to: **IAM & Admin** → **Service Accounts**
 2. Select project: `test-project-506110`
 3. Find: `test-cross-project-sa@test-project-506110.iam.gserviceaccount.com`
 
 **Step 2: Try to create a key**
 1. Click on the service account
 2. Go to **"Keys"** tab
-3. Click **"Add Key"** ? **"Create new key"**
+3. Click **"Add Key"** → **"Create new key"**
 4. Select **"JSON"** format
 5. Click **"Create"**
 
-**Expected Result:** Error message � "Key creation is disabled by organization policy" or similar policy violation error.
+**Expected Result:** Error message: "Key creation is disabled by organization policy" or similar policy violation error.
 
 ---
 
@@ -51,7 +51,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -67,7 +67,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to Liens page**
-1. Navigate to: **IAM & Admin** ? **Liens**
+1. Navigate to: **IAM & Admin** → **Liens**
 2. Select project: `test-project-506110`
 
 **Step 2: Try to create a lien**
@@ -78,7 +78,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 **Expected Result:** The lien creation should be restricted or the option to remove liens created by cross-project service accounts should be blocked.
 
-**Note:** This policy prevents service accounts from other projects from removing resource liens. It'''s a protective measure to ensure that critical resources cannot be deleted by unauthorized cross-project service accounts.
+**Note:** This policy prevents service accounts from other projects from removing resource liens. It's a protective measure to ensure that critical resources cannot be deleted by unauthorized cross-project service accounts.
 
 ---
 
@@ -89,7 +89,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -105,7 +105,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to VPC Networks**
-1. Navigate to: **VPC network** ? **VPC networks**
+1. Navigate to: **VPC network** → **VPC networks**
 2. Select project: `test-project-506110`
 
 **Step 2: Check for default network**
@@ -113,9 +113,9 @@ All 10 policies are applied at folder level and validated on GCP Console.
 2. If no default network exists, the policy is working
 
 **Step 3: Try to create a new project (if possible)**
-1. Navigate to: **IAM & Admin** ? **Create a Project**
+1. Navigate to: **IAM & Admin** → **Create a Project**
 2. Create a new project under folder `278994416390`
-3. After creation, go to **VPC network** ? **VPC networks**
+3. After creation, go to **VPC network** → **VPC networks**
 4. Verify: No default network is automatically created
 
 **Expected Result:** No default VPC network is created when a new project is created under this folder.
@@ -129,7 +129,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -145,7 +145,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to VM Instances**
-1. Navigate to: **Compute Engine** ? **VM instances**
+1. Navigate to: **Compute Engine** → **VM instances**
 2. Select project: `test-project-506110`
 
 **Step 2: Try to create a VM with external IP**
@@ -159,7 +159,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 4. Under **"Network interface"**, try to set **"External IP"** to **"Ephemeral"**
 5. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/compute.vmExternalIpAccess violated" or similar policy violation error.
+**Expected Result:** Error message: "Policy constraints/compute.vmExternalIpAccess violated" or similar policy violation error.
 
 ---
 
@@ -170,7 +170,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -178,28 +178,53 @@ All 10 policies are applied at folder level and validated on GCP Console.
 2. Click on the policy name
 3. Verify:
    - **Status:** Enforced
-   - **Value:** Allowed services list (compute.googleapis.com, storage.googleapis.com, cloudkms.googleapis.com)
+   - **Rules:** Shows **Denied** services: `genomics.googleapis.com`, `translate.googleapis.com`, `vision.googleapis.com` (matches `denied_values` in `main.tf`)
    - **Scope:** folders/278994416390
+4. If you open the policy at **project level** (or any level below where it is set), the console shows this banner:
+   > "This is the result of merging policies in the resource hierarchy and evaluating conditions. The policy does not have a condition set because it is a computed policy across multiple resources."
+
+   This is **NOT an error** - it is the console showing the effective/inherited policy merged from the folder hierarchy. Seeing the denied services listed there confirms the folder-level policy is applied.
 
 ---
 
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to API Library**
-1. Navigate to: **APIs & Services** ? **Library**
+1. Navigate to: **APIs & Services** → **Library**
 2. Select project: `test-project-506110`
 
-**Step 2: Try to enable a restricted API**
-1. Search for an API that is NOT in the allowed list (e.g., `Cloud Functions API`, `BigQuery API`, `Pub/Sub API`)
-2. Click on the API
-3. Click **"Enable"**
+**Step 2: Try to enable a DENIED API**
 
-**Expected Result:** Error message � "Policy constraints/gcp.restrictServiceUsage violated" or similar policy violation error.
+> Important: this policy is a **deny list**, NOT an allow list. Only the 3 services above are blocked. Enabling any OTHER API (Cloud Functions, BigQuery, Pub/Sub, etc.) will SUCCEED and does NOT prove the policy works. Use one of the denied APIs:
 
-**Step 3: Verify allowed APIs work**
-1. Search for an API that IS in the allowed list (e.g., `Compute Engine API`, `Cloud Storage API`, `Cloud KMS API`)
+1. Search for **`Cloud Translation API`** (`translate.googleapis.com`) - or use **`Cloud Vision API`** (`vision.googleapis.com`) / **`Genomics API`** (`genomics.googleapis.com`)
 2. Click on the API
-3. Verify: It should be enabled or allow enabling without error.
+
+**Case A - API shows an "Enable" button (currently disabled):**
+1. Click **"Enable"**
+2. **Expected Result:** Error message: "Policy constraints/gcp.restrictServiceUsage violated" or "Permission 'serviceusage.services.enable' has been denied by organization policy".
+
+**Case B - API already shows "Enabled"** (Cloud Translation API is enabled by default in new GCP projects, or was enabled BEFORE this folder policy was applied):
+> Org policies do NOT disable services retroactively - they only block FUTURE enable actions. So an already-enabled service is NOT a policy failure. To prove enforcement:
+1. Click **"Disable"** and wait until the service is disabled
+2. Click **"Enable"** again
+3. **Expected Result:** Enable is now BLOCKED with the policy violation error from Case A above.
+
+**Step 3: Verify non-denied APIs still work**
+1. Search for an API that is NOT in the deny list (e.g., `Compute Engine API`, `Cloud Storage API`)
+2. Verify: It should be enabled or allow enabling without error (there is no allow list - all non-denied APIs stay available).
+
+**CLI verification:**
+```bash
+# Confirm the effective policy shows the deny list:
+gcloud org-policies describe gcp.restrictServiceUsage --project=test-project-506110 --effective
+
+# If translate is already enabled, disable it first:
+gcloud services disable translate.googleapis.com --project=test-project-506110
+
+# Now attempt to re-enable - this should FAIL with an org policy violation:
+gcloud services enable translate.googleapis.com --project=test-project-506110
+```
 
 ---
 
@@ -210,7 +235,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -226,7 +251,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to Cloud Storage**
-1. Navigate to: **Cloud Storage** ? **Buckets**
+1. Navigate to: **Cloud Storage** → **Buckets**
 2. Select project: `test-project-506110`
 
 **Step 2: Try to create a bucket without uniform access**
@@ -238,11 +263,11 @@ All 10 policies are applied at folder level and validated on GCP Console.
 4. Try to disable **"Uniform bucket-level access"**
 5. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/storage.uniformBucketLevelAccess violated" or the option to disable uniform access should be grayed out/unavailable.
+**Expected Result:** Error message: "Policy constraints/storage.uniformBucketLevelAccess violated" or the option to disable uniform access should be grayed out/unavailable.
 
 **Step 3: Verify uniform access is enforced**
 1. Create a bucket with uniform access enabled (default)
-2. Go to the bucket ? **"Permissions"** tab
+2. Go to the bucket → **"Permissions"** tab
 3. Verify: **"Uniform bucket-level access"** is enabled and cannot be disabled.
 
 ---
@@ -254,7 +279,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -270,7 +295,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to Compute Engine**
-1. Navigate to: **Compute Engine** ? **Disks**
+1. Navigate to: **Compute Engine** → **Disks**
 2. Select project: `test-project-506110`
 
 **Step 2: Verify CMEK-encrypted disk exists**
@@ -289,7 +314,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 3. Under **"Encryption"**, select **"Google-managed encryption key"** (default)
 4. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/gcp.restrictNonCmekServices violated" or similar policy violation error.
+**Expected Result:** Error message: "Policy constraints/gcp.restrictNonCmekServices violated" or similar policy violation error.
 
 ---
 
@@ -300,7 +325,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -316,7 +341,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to VM Instances**
-1. Navigate to: **Compute Engine** ? **VM instances**
+1. Navigate to: **Compute Engine** → **VM instances**
 2. Select project: `test-project-506110`
 
 **Step 2: Try to create a VM with non-FIPS machine type**
@@ -328,7 +353,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 3. Under **"Machine type"**, select a non-FIPS machine type (e.g., `e2-micro`, `e2-small`, `n1-standard-1`)
 4. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/compute.disableNonFIPSMachineTypes violated" or similar policy violation error.
+**Expected Result:** Error message: "Policy constraints/compute.disableNonFIPSMachineTypes violated" or similar policy violation error.
 
 **Step 3: Verify FIPS machine types work**
 1. Try to create a VM with a FIPS-compliant machine type (e.g., `n2-standard-2`, `c2-standard-4`)
@@ -343,7 +368,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the custom constraint**
@@ -355,12 +380,12 @@ All 10 policies are applied at folder level and validated on GCP Console.
    - **Scope:** folders/278994416390
 
 **Step 3: Check custom constraint definition**
-1. Navigate to: **IAM & Admin** ? **Organization Policies** ? **Custom Constraints**
+1. Navigate to: **IAM & Admin** → **Organization Policies** → **Custom Constraints**
 2. Search for: `custom.restrictDiskTypes`
 3. Verify:
    - **Resource type:** `compute.googleapis.com/Disk`
    - **Method types:** CREATE
-   - **Condition:** `resource.type != '''pd-standard''' && resource.type != '''pd-balanced'''`
+   - **Condition:** `resource.type != 'pd-standard' && resource.type != 'pd-balanced'`
    - **Action:** DENY
 
 ---
@@ -368,7 +393,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 ### Part 2: Test the Policy (Verify Enforcement)
 
 **Step 1: Go to Compute Engine**
-1. Navigate to: **Compute Engine** ? **Disks**
+1. Navigate to: **Compute Engine** → **Disks**
 2. Select project: `test-project-506110`
 
 **Step 2: Try to create a disk with restricted type**
@@ -381,7 +406,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 3. Under **"Disk type"**, select a restricted type (e.g., `pd-ssd`, `pd-extreme`)
 4. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/custom.restrictDiskTypes violated" or similar policy violation error.
+**Expected Result:** Error message: "Policy constraints/custom.restrictDiskTypes violated" or similar policy violation error.
 
 **Step 3: Verify allowed disk types work**
 1. Try to create a disk with an allowed type (`pd-standard` or `pd-balanced`)
@@ -396,7 +421,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 **Step 1: Go to GCP Console**
 1. Open: https://console.cloud.google.com
 2. Select your organization: `563019909339`
-3. Navigate to: **IAM & Admin** ? **Organization Policies**
+3. Navigate to: **IAM & Admin** → **Organization Policies**
 4. In the filter box, select **"Folder"** and enter: `278994416390`
 
 **Step 2: Find the policy**
@@ -404,7 +429,7 @@ All 10 policies are applied at folder level and validated on GCP Console.
 2. Click on the policy name
 3. Verify:
    - **Status:** Enforced
-   - **Value:** Allowed values list (PRIVATE_RANGES_ONLY, ALL_TRAFFIC)
+   - **Value:** Allowed values list (PRIVATE_RANGES_ONLY)
    - **Scope:** folders/278994416390
 
 ---
@@ -421,13 +446,13 @@ All 10 policies are applied at folder level and validated on GCP Console.
    - **Function name:** `test-egress-function`
    - **Region:** `us-central1`
 3. Go to **"Runtime, build, connections and security settings"**
-4. Under **"Connections"**, try to set **"Egress setting"** to a value NOT in the allowed list
+4. Under **"Connections"**, try to set **"Egress setting"** to `ALL_TRAFFIC` (NOT in the allowed list)
 5. Click **"Create"**
 
-**Expected Result:** Error message � "Policy constraints/cloudfunctions.allowedVpcConnectorEgressSettings violated" or the restricted option should not be available.
+**Expected Result:** Error message: "Policy constraints/cloudfunctions.allowedVpcConnectorEgressSettings violated" or the restricted option should not be available.
 
 **Step 3: Verify allowed egress settings work**
-1. Try to create a function with an allowed egress setting (`PRIVATE_RANGES_ONLY` or `ALL_TRAFFIC`)
+1. Try to create a function with the allowed egress setting (`PRIVATE_RANGES_ONLY`)
 2. Verify: Function creation should succeed without error.
 
 ---
@@ -436,15 +461,15 @@ All 10 policies are applied at folder level and validated on GCP Console.
 
 | Policy | Constraint | Status | Scope |
 |--------|------------|--------|-------|
-| 1 | `iam.disableServiceAccountKeyCreation` | ? Validated | Folder |
-| 2 | `iam.restrictCrossProjectServiceAccountLienRemoval` | ? Validated | Folder |
-| 3 | `compute.skipDefaultNetworkCreation` | ? Validated | Folder |
-| 4 | `compute.managed.vmExternalIpAccess` | ? Validated | Folder |
-| 5 | `gcp.restrictServiceUsage` | ? Validated | Folder |
-| 6 | `storage.uniformBucketLevelAccess` | ? Validated | Folder |
-| 7 | `gcp.restrictNonCmekServices` | ? Validated | Folder |
-| 8 | `compute.disableNonFIPSMachineTypes` | ? Validated | Folder |
-| 9 | `custom.restrictDiskTypes` | ? Validated | Folder |
-| 10 | `cloudfunctions.allowedVpcConnectorEgressSettings` | ? Validated | Folder |
+| 1 | `iam.disableServiceAccountKeyCreation` | ✅ Validated | Folder |
+| 2 | `iam.restrictCrossProjectServiceAccountLienRemoval` | ✅ Validated | Folder |
+| 3 | `compute.skipDefaultNetworkCreation` | ✅ Validated | Folder |
+| 4 | `compute.managed.vmExternalIpAccess` | ✅ Validated | Folder |
+| 5 | `gcp.restrictServiceUsage` | ✅ Validated | Folder |
+| 6 | `storage.uniformBucketLevelAccess` | ✅ Validated | Folder |
+| 7 | `gcp.restrictNonCmekServices` | ✅ Validated | Folder |
+| 8 | `compute.disableNonFIPSMachineTypes` | ✅ Validated | Folder |
+| 9 | `custom.restrictDiskTypes` | ✅ Validated | Folder |
+| 10 | `cloudfunctions.allowedVpcConnectorEgressSettings` | ✅ Validated | Folder |
 
-**All 10 policies validated at folder level (278994416390)!** ?
+**All 10 policies validated at folder level (278994416390)!** ✅

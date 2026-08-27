@@ -29,6 +29,7 @@ locals {
         constraint       = constraint
         id               = fid
         enforce          = try(cfg.enforce, null)
+        deny_all         = try(cfg.deny_all, false)
         conditions       = try(cfg.conditions, [])
         list_constraints = try(cfg.list_constraints, [])
       }
@@ -41,6 +42,7 @@ locals {
         constraint       = constraint
         id               = pid
         enforce          = try(cfg.enforce, null)
+        deny_all         = try(cfg.deny_all, false)
         conditions       = try(cfg.conditions, [])
         list_constraints = try(cfg.list_constraints, [])
       }

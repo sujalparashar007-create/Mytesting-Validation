@@ -28,12 +28,27 @@ output "service_project_id" {
   value       = var.service_project_id
 }
 
+output "test_vpc_id" {
+  description = "The ID of the custom VPC created for the positive-test VM."
+  value       = google_compute_network.test_vpc.id
+}
+
+output "test_subnet_id" {
+  description = "The ID of the custom subnet created for the positive-test VM."
+  value       = google_compute_subnetwork.test_subnet.id
+}
+
 output "cmek_vm_name" {
-  description = "The name of the CMEK-encrypted VM."
+  description = "The name of the CMEK-encrypted positive-test VM."
   value       = google_compute_instance.cmek_vm.name
 }
 
 output "cmek_vm_self_link" {
-  description = "The self_link of the CMEK-encrypted VM."
+  description = "The self_link of the CMEK-encrypted positive-test VM."
   value       = google_compute_instance.cmek_vm.self_link
+}
+
+output "cmek_vm_machine_type" {
+  description = "The machine type of the CMEK-encrypted positive-test VM."
+  value       = google_compute_instance.cmek_vm.machine_type
 }

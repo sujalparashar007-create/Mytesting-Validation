@@ -4,7 +4,7 @@ variable "org_id" {
 }
 
 variable "org_constraints" {
-  description = "Map of built-in organization policy constraints to enforce, keyed by constraint name (e.g. \"compute.disableSerialPortAccess\"). enforce is a tri-state string (\"TRUE\", \"FALSE\", or unset) so a constraint can carry only list_constraints without a boolean rule."
+  description = "Map of built-in organization policy constraints to enforce, keyed by constraint name (e.g. \"compute.disableSerialPortAccess\"). enforce is a tri-state string (\"TRUE\", \"FALSE\", or unset) so a constraint can carry only list_constraints without a boolean rule. Set deny_all = true for list constraints that should deny all values."
   type = map(object({
     enforce = optional(string)
     # project/folder IDs where this constraint's boolean rule is explicitly
@@ -21,6 +21,8 @@ variable "org_constraints" {
       allowed_values = optional(list(string))
       denied_values  = optional(list(string))
     })), [])
+    # For list constraints that should deny all values (e.g. compute.vmExternalIpAccess).
+    deny_all = optional(bool, false)
   }))
   default = {}
 }

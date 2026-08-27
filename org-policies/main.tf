@@ -71,6 +71,13 @@ resource "google_org_policy_policy" "folder_targets" {
         }
       }
     }
+
+    dynamic "rules" {
+      for_each = each.value.deny_all ? [1] : []
+      content {
+        deny_all = true
+      }
+    }
   }
 }
 
@@ -109,6 +116,13 @@ resource "google_org_policy_policy" "project_targets" {
           allowed_values = rules.value.allowed_values
           denied_values  = rules.value.denied_values
         }
+      }
+    }
+
+    dynamic "rules" {
+      for_each = each.value.deny_all ? [1] : []
+      content {
+        deny_all = true
       }
     }
   }

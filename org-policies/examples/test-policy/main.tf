@@ -9,37 +9,14 @@ locals {
       enforce = "TRUE"
     }
 
-    "iam.restrictCrossProjectServiceAccountLienRemoval" = {
-      enforce = "TRUE"
-    }
-
-    # Instructor requirement: "Disable cross-project service account access".
-    # The dedicated constraint iam.disableCrossProjectServiceAccountUsage is a
-    # Google-managed (legacy) constraint: the restrictive behavior (service
-    # accounts can only be used by resources running in their own project) is
-    # enforced by Google's managed DEFAULT, and users are NOT allowed to
-    # create policies for it. Verified against the live Org Policy API: this
-    # constraint is absent from the settable constraint list at BOTH org and
-    # folder scope (folder exposes 194 constraints, org 195 - neither lists
-    # it), and creating a policy for it returns:
-    #   "Error 404: Requested entity was not found".
-    # There is NO alternative user-settable built-in constraint for this
-    # intent, so this requirement is covered by:
-    #   1. Google-managed default of iam.disableCrossProjectServiceAccountUsage
-    #      (cross-project service account usage restricted by default).
-    #   2. iam.restrictCrossProjectServiceAccountLienRemoval above, which
-    #      requires organization-level permission to remove cross-project
-    #      service account liens.
-    # DO NOT re-add "iam.disableCrossProjectServiceAccountUsage" here: apply
-    # will always fail with 404 for it.
-
     # Networking
     "compute.skipDefaultNetworkCreation" = {
       enforce = "TRUE"
     }
 
-    "compute.managed.vmExternalIpAccess" = {
-      enforce = "TRUE"
+    "compute.vmExternalIpAccess" = {
+      # List constraint: deny all external IPv4 access for VMs.
+      deny_all = true
     }
 
     # APIs
@@ -68,11 +45,6 @@ locals {
       }]
     }
 
-    # Compute
-    "compute.disableNonFIPSMachineTypes" = {
-      enforce = "TRUE"
-    }
-
     # Cloud Functions
     "cloudfunctions.allowedVpcConnectorEgressSettings" = {
       list_constraints = [{
@@ -80,6 +52,14 @@ locals {
       }]
     }
   }
+
+  # CEL condition for the custom VM machine-type constraint.
+  # DENY when the machine type is NOT in the approved list.
+  vm_machine_type_condition = "([\"${join("\", \"", var.allowed_vm_machine_types)}\"].exists(type, resource.machineType.contains(type))) == false"
+
+  # CEL condition for the custom disk-type constraint.
+  # DENY when the disk type does NOT contain "pd-balanced".
+  disk_type_condition = "([\"pd-balanced\"].exists(disktype, resource.type.contains(disktype))) == false"
 }
 
 module "org_policies" {
@@ -102,21 +82,26 @@ module "org_policies" {
   # (folder_target_ids), because org-level policies are disabled here
   # (create_org_policies = false).
   custom_constraint_policies = {
+    restrictVmMachineType = {
+      display_name = "Restrict VM machine types"
+      description  = "Only approved VM machine types are allowed. Any non-approved machine type is denied."
+      action_type  = "DENY"
+      # resource.machineType carries the full machine type path, e.g.:
+      #   projects/<project>/zones/<zone>/machineTypes/n1-standard-1
+      # DENY when the machine type is NOT in the approved allow-list.
+      condition      = local.vm_machine_type_condition
+      method_types   = ["CREATE"]
+      resource_types = ["compute.googleapis.com/Instance"]
+      enforce        = "TRUE"
+    }
+
     restrictDiskTypes = {
       display_name = "Restrict disk types to pd-balanced"
       description  = "Only pd-balanced disks are allowed. Any other disk type (pd-ssd, pd-standard, pd-extreme, Hyperdisk, ...) is denied."
       action_type  = "DENY"
-      # CEL must use resource.type (NOT resource.diskType - that field does not
-      # exist in the compute.googleapis.com/Disk custom-constraint schema, the
-      # Org Policy API rejects it with "undefined field 'diskType'").
       # resource.type carries the full disk type path, e.g.:
       #   projects/<project>/zones/<zone>/diskTypes/pd-balanced
-      # Pattern adapted from Google's official sample
-      # "custom.computeAllowedDiskTypes" in
-      # GoogleCloudPlatform/professional-services →
-      # tools/custom-organization-policy-library: DENY when the type is not in
-      # the allow-list.
-      condition      = "([\"pd-balanced\"].exists(disktype, resource.type.contains(disktype))) == false"
+      condition      = local.disk_type_condition
       method_types   = ["CREATE"]
       resource_types = ["compute.googleapis.com/Disk"]
       enforce        = "TRUE"
@@ -140,6 +125,32 @@ resource "google_project_service" "main_project_compute" {
   project            = var.main_project_id
   service            = "compute.googleapis.com"
   disable_on_destroy = false
+}
+
+# -----------------------------------------------------------------------------
+# Custom VPC/Subnet for Positive VM Test
+# -----------------------------------------------------------------------------
+
+# Custom VPC. Required because compute.skipDefaultNetworkCreation prevents
+# the default VPC from being created, and the positive-test VM needs a network.
+resource "google_compute_network" "test_vpc" {
+  name                    = var.network_name
+  project                 = var.main_project_id
+  auto_create_subnetworks = false
+  routing_mode            = "GLOBAL"
+
+  depends_on = [google_project_service.main_project_compute]
+}
+
+# Custom subnet for the positive-test VM.
+resource "google_compute_subnetwork" "test_subnet" {
+  name          = var.subnetwork_name
+  project       = var.main_project_id
+  region        = var.subnetwork_region
+  network       = google_compute_network.test_vpc.id
+  ip_cidr_range = var.subnetwork_cidr
+
+  depends_on = [google_compute_network.test_vpc]
 }
 
 # -----------------------------------------------------------------------------
@@ -198,7 +209,7 @@ resource "google_compute_disk" "cmek_disk" {
 
 # Service Account in Main Project (Project-A)
 resource "google_service_account" "cross_project_sa" {
-  account_id   = "test-cross-project-sa"
+  account_id   = var.sa_account_id
   display_name = "Test Cross-Project Service Account"
   project      = var.main_project_id
 
@@ -223,23 +234,26 @@ resource "google_project_service" "service_project_compute" {
 }
 
 # -----------------------------------------------------------------------------
-# CMEK-Encrypted VM for Cross-Project SA Validation
+# CMEK-Encrypted Positive-Test VM
 # -----------------------------------------------------------------------------
 
-# CMEK-encrypted VM in Main Project using the cross-project SA
-# This validates that:
-# 1. The SA works within the same project (Project-A)
-# 2. CMEK policy is satisfied (disk is encrypted)
-# 3. Cross-project SA usage is blocked by Google-managed constraint
+# Compliant VM in Main Project.
+# Validates:
+#   1. custom.restrictVmMachineType (approved machine type)
+#   2. gcp.restrictNonCmekServices (boot disk is CMEK-encrypted)
+#   3. custom.restrictDiskTypes (boot disk is pd-balanced)
+#   4. compute.vmExternalIpAccess (no external IP)
+#   5. compute.skipDefaultNetworkCreation (uses custom VPC, not default)
 resource "google_compute_instance" "cmek_vm" {
-  name         = "test-cmek-vm"
-  project      = var.main_project_id
-  zone         = var.disk_zone
-  machine_type = "e2-micro"
+  name                      = var.vm_name
+  project                   = var.main_project_id
+  zone                      = var.disk_zone
+  machine_type              = var.vm_machine_type
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = var.vm_image
       size  = 10
       type  = "pd-balanced"
     }
@@ -248,7 +262,8 @@ resource "google_compute_instance" "cmek_vm" {
   }
 
   network_interface {
-    network = "default"
+    network    = google_compute_network.test_vpc.id
+    subnetwork = google_compute_subnetwork.test_subnet.id
   }
 
   service_account {
@@ -258,31 +273,40 @@ resource "google_compute_instance" "cmek_vm" {
 
   depends_on = [
     google_project_iam_member.sa_compute_access,
-    google_kms_crypto_key_iam_binding.compute_sa_key_access
+    google_kms_crypto_key_iam_binding.compute_sa_key_access,
+    google_compute_subnetwork.test_subnet
   ]
 }
 
-# Test VM in Service Project using Main Project's SA
-# NOTE: This resource will FAIL to create due to org policy
-# iam.disableCrossProjectServiceAccountUsage (Google-managed default).
-# This is intentional to validate the policy enforcement.
-# To test, uncomment this resource and run terraform apply.
-# Expected error: "Cross-project service account usage is disabled"
+# -----------------------------------------------------------------------------
+# Commented Negative-Test Resources
+# -----------------------------------------------------------------------------
 
-# resource "google_compute_instance" "cross_project_vm" {
-#   name         = "test-cross-project-vm"
-#   project      = var.service_project_id
+# NEGATIVE TEST: Non-approved machine type.
+# This resource will FAIL if uncommented because custom.restrictVmMachineType
+# denies machine types that are not in var.allowed_vm_machine_types.
+# To test, uncomment and run terraform apply.
+# Expected error: "Policy constraints/custom.restrictVmMachineType violated"
+
+# resource "google_compute_instance" "negative_machine_type_vm" {
+#   name         = "test-non-approved-machine-type-vm"
+#   project      = var.main_project_id
 #   zone         = var.disk_zone
 #   machine_type = "e2-micro"
 #
 #   boot_disk {
 #     initialize_params {
-#       image = "debian-cloud/debian-11"
+#       image = var.vm_image
+#       size  = 10
+#       type  = "pd-balanced"
 #     }
+#
+#     kms_key_self_link = google_kms_crypto_key.disk_key.id
 #   }
 #
 #   network_interface {
-#     network = "default"
+#     network    = google_compute_network.test_vpc.id
+#     subnetwork = google_compute_subnetwork.test_subnet.id
 #   }
 #
 #   service_account {
@@ -290,5 +314,49 @@ resource "google_compute_instance" "cmek_vm" {
 #     scopes = ["cloud-platform"]
 #   }
 #
-#   depends_on = [google_project_service.service_project_compute]
+#   depends_on = [
+#     google_project_iam_member.sa_compute_access,
+#     google_kms_crypto_key_iam_binding.compute_sa_key_access,
+#     google_compute_subnetwork.test_subnet
+#   ]
+# }
+
+# NEGATIVE TEST: Cross-project service account usage.
+# This resource will FAIL if uncommented because iam.disableCrossProjectServiceAccountUsage
+# is a Google-managed legacy constraint that blocks using a service account from one project
+# on a resource in another project.
+# To test, uncomment and run terraform apply.
+# Expected error: "Cross-project service account usage is disabled"
+
+# resource "google_compute_instance" "cross_project_vm" {
+#   name         = "test-cross-project-vm"
+#   project      = var.service_project_id
+#   zone         = var.disk_zone
+#   machine_type = var.vm_machine_type
+#
+#   boot_disk {
+#     initialize_params {
+#       image = var.vm_image
+#       size  = 10
+#       type  = "pd-balanced"
+#     }
+#
+#     kms_key_self_link = google_kms_crypto_key.disk_key.id
+#   }
+#
+#   network_interface {
+#     network    = google_compute_network.test_vpc.id
+#     subnetwork = google_compute_subnetwork.test_subnet.id
+#   }
+#
+#   service_account {
+#     email  = google_service_account.cross_project_sa.email
+#     scopes = ["cloud-platform"]
+#   }
+#
+#   depends_on = [
+#     google_project_service.service_project_compute,
+#     google_kms_crypto_key_iam_binding.compute_sa_key_access,
+#     google_compute_subnetwork.test_subnet
+#   ]
 # }
