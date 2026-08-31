@@ -107,5 +107,5 @@ resource "google_compute_global_forwarding_rule" "default" {
   port_range = length(var.ssl_domains) > 0 ? "443" : "80"
   ip_address = var.ip_address
 
-  load_balancing_scheme = "EXTERNAL_MANAGED"
+  load_balancing_scheme = "EXTERNAL"
 }

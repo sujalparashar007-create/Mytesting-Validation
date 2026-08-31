@@ -1,11 +1,45 @@
-# Basic example
+**# Basic example**
 
-Creates two top-level folders (Production, Non-Production) and one project in
-each, with a few APIs enabled. Replace the organization ID, project IDs, and
-billing account with your own values.
+Calls `resource-hierarchy` to create two top-level folders (Production and
 
-```bash
-tofu init
-tofu plan
-tofu apply
-```
+Non-Production), one project in each folder, and enable selected APIs.
+
+**## Usage**
+
+\`\`\`bash
+
+terraform init
+
+terraform plan \\
+
+  -var="org\_id=\<your-organization-id>" \\
+
+  -var="billing\_account=\<your-billing-account-id>"
+
+terraform apply \\
+
+  -var="org\_id=\<your-organization-id>" \\
+
+  -var="billing\_account=\<your-billing-account-id>"
+
+\`\`\`
+
+**## Inputs**
+
+| Name | Description | Type | Required |
+
+|---|---|---|---|
+
+| org\_id | Organization ID under which the top-level folders are created, e.g. `organizations/1234567890`. | \`string\` | yes |
+
+| billing\_account | Billing account ID used to link the example projects. | \`string\` | yes |
+
+**## Outputs**
+
+| Name | Description |
+
+|---|---|
+
+| folder\_ids | Map of folder key to created folder ID. |
+
+| project\_ids | Map of project key to created project ID. |
